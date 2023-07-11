@@ -1,0 +1,35 @@
+version: '3'
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    build: 
+      context: ../sqlite/
+    ports:
+      - '5432:5432' # expose ports - HOST:CONTAINER
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB : postgres
+    volumes:
+      - ./database_volume/data.sql:/docker-entrypoint-initdb.d/dumps.sql
+    networks:
+      - network
+
+  app:
+    image : pcmaker
+    build: 
+      context: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks:
+      - network
+    links:
+      - postgres
+
+networks:
+  network:
+    driver: bridge
